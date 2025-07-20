@@ -33,6 +33,7 @@ const control = {
   contactedWithBlobs: 10,
   infectionChance: 5,
   showPaths: false,
+  selectedDisease: "COVID-19",
   reload: function () {
     this.play = false;
     resetBlobs();
@@ -429,6 +430,182 @@ function render() {
   renderer.render(scene, camera);
 }
 
+// Define diseases
+const diseases = {
+  "COVID-19": {
+      infectionRadius: 20,
+      infectionChance: 0.25,
+      recoveryTime: 500,
+      deathChance: 0.02,
+      speedMultiplier: 1.0
+  },
+  "Ebola": {
+      infectionRadius: 15,
+      infectionChance: 0.5,
+      recoveryTime: 700,
+      deathChance: 0.7,
+      speedMultiplier: 0.8
+  },
+  "Flu": {
+      infectionRadius: 25,
+      infectionChance: 0.1,
+      recoveryTime: 300,
+      deathChance: 0.001,
+      speedMultiplier: 1.2
+  }
+};
+
+let selectedDisease = null;
+let diseaseParams = null;
+
+const diseaseData = {
+  "COVID-19": { infectionRate: 10, recoveryRate: 85 },
+  "Flu": { infectionRate: 5, recoveryRate: 95 },
+  "Ebola": { infectionRate: 25, recoveryRate: 50 }
+};
+
+
+// Popup to select disease before simulation starts
+function selectDisease() {
+  let diseaseNames = Object.keys(diseases);
+  let choice = prompt("Choose a disease:\n" + diseaseNames.map((d, i) => `${i + 1}. ${d}`).join("\n"));
+
+  let index = parseInt(choice) - 1;
+  if (index >= 0 && index < diseaseNames.length) {
+      selectedDisease = diseaseNames[index];
+      diseaseParams = diseases[selectedDisease];
+  } else {
+      alert("Invalid choice. Defaulting to COVID-19.");
+      selectedDisease = "COVID-19";
+      diseaseParams = diseases[selectedDisease];
+  }
+}
+
+// Update Blob class (or function constructor) to include disease parameters
+class Blob {
+  constructor(x, y) {
+      this.x = x;
+      this.y = y;
+      this.status = "healthy"; // healthy, infected, recovered, dead
+      this.infectedTime = 0;
+
+      // Movement speed depending on disease
+      const angle = Math.random() * 2 * Math.PI;
+      const baseSpeed = random(1, 3) * diseaseParams.speedMultiplier;
+      this.vx = Math.cos(angle) * baseSpeed;
+      this.vy = Math.sin(angle) * baseSpeed;
+  }
+
+  move() {
+      if (this.status !== "dead") {
+          this.x += this.vx;
+          this.y += this.vy;
+
+          // Bounce off walls
+          if (this.x <= 0 || this.x >= width) this.vx *= -1;
+          if (this.y <= 0 || this.y >= height) this.vy *= -1;
+      }
+  }
+
+  draw() {
+      noStroke();
+      if (this.status === "healthy") fill(0, 255, 0);
+      else if (this.status === "infected") fill(255, 0, 0);
+      else if (this.status === "recovered") fill(0, 0, 255);
+      else if (this.status === "dead") fill(0);
+
+      ellipse(this.x, this.y, 8, 8);
+  }
+
+  update() {
+      if (this.status === "infected") {
+          this.infectedTime++;
+          if (this.infectedTime >= diseaseParams.recoveryTime) {
+              if (Math.random() < diseaseParams.deathChance) {
+                  this.status = "dead";
+              } else {
+                  this.status = "recovered";
+              }
+          }
+      }
+  }
+
+  infect(other) {
+      if (this.status === "infected" && other.status === "healthy") {
+          const dx = this.x - other.x;
+          const dy = this.y - other.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+
+          if (distance < diseaseParams.infectionRadius) {
+              if (Math.random() < diseaseParams.infectionChance) {
+                  other.status = "infected";
+              }
+          }
+      }
+  }
+}
+
+// Then, your setup code
+let blobs = [];
+
+function setup() {
+  createCanvas(1000, 700);
+  selectDisease(); // Select disease first
+
+  // Create blobs
+  for (let i = 0; i < 150; i++) {
+      blobs.push(new Blob(random(width), random(height)));
+  }
+
+  // Infect one random blob
+  let patientZero = random(blobs);
+  patientZero.status = "infected";
+}
+
+function draw() {
+  background(240);
+
+  // Update and draw blobs
+  for (let blob of blobs) {
+      blob.move();
+      blob.update();
+      blob.draw();
+  }
+
+  // Infection spread
+  for (let i = 0; i < blobs.length; i++) {
+      for (let j = i + 1; j < blobs.length; j++) {
+          blobs[i].infect(blobs[j]);
+          blobs[j].infect(blobs[i]);
+      }
+  }
+
+  // Display stats
+  displayStats();
+}
+
+// Stats panel
+function displayStats() {
+  let healthy = blobs.filter(b => b.status === "healthy").length;
+  let infected = blobs.filter(b => b.status === "infected").length;
+  let recovered = blobs.filter(b => b.status === "recovered").length;
+  let dead = blobs.filter(b => b.status === "dead").length;
+
+  fill(50);
+  textSize(16);
+  text(`Disease: ${selectedDisease}`, 10, 20);
+  text(`Healthy: ${healthy}`, 10, 40);
+  text(`Infected: ${infected}`, 10, 60);
+  text(`Recovered: ${recovered}`, 10, 80);
+  text(`Dead: ${dead}`, 10, 100);
+}
+
+// Random utility function if not already defined
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+
 // Infecting algorightm
 function infectBlobs() {
   var initInfectedBlobs = control.infectedBlobs;
@@ -473,6 +650,15 @@ function initControls() {
   infectionSettings
     .add(control, "contactedWithBlobs", 1, 50, 1)
     .name("Physical contacts per blob");
+
+  infectionSettings
+    .add(control, "selectedDisease", Object.keys(diseases))
+    .name("Select Disease")
+    .onChange(function(value) {
+      selectedDisease = value;
+      diseaseParams = diseases[selectedDisease];
+      console.log("Disease changed to:", selectedDisease);
+    });
   var controls = gui.addFolder("Controls");
   controls.add(control, "showPaths").name("Show paths (Reload)");
   controls.add(control, "stopAnimation").name("Play/Stop Simulation");
