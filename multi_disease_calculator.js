@@ -311,7 +311,7 @@ diseases.forEach(disease => {
 
 // Add CSV download functionality
 function downloadCSV() {
-    const csvContent = "data:text/csv;charset=utf-8,";
+let csvContent = "data:text/csv;charset=utf-8,";
     
     diseases.forEach((disease, index) => {
         const results = calculateDiseaseResults(disease.params);
