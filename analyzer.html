@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Disease Calculator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f9f9f9;
+        color: #333;
+      }
+      .section {
+        border: 1px solid #ccc;
+        padding: 15px;
+        margin-bottom: 20px;
+        background: #fff;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+      }
+      th, td {
+        border: 1px solid #ccc;
+        padding: 8px;
+        text-align: center;
+      }
+      .disease-header {
+        font-size: 1.2em;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #2a9d8f;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Disease Simulation Results (CSV Generator)</h1>
+    <div id="diseases"></div>
+    <button onclick="downloadCSV()">Download CSV</button>
+
+    <!-- Link the simulation results script -->
+    <script src="./multi_disease_calculator.js"></script>
+  </body>
+</html>
