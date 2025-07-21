@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Pandemic JS Calculator</title>
+  </head>
+  <body>
+    <h1>Pandemic JS Outbreak Calculator</h1>
+    <pre id="output">Running simulation...</pre>
+
+    <script src="js/pandemic_calculator.js"></script>
+    <script>
+      const oldLog = console.log;
+      const outputDiv = document.getElementById('output');
+      console.log = function (message) {
+        outputDiv.textContent += message + '\n';
+        oldLog.apply(console, arguments);
+      };
+    </script>
+  </body>
+</html>
