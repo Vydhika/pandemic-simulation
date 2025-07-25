@@ -47,6 +47,39 @@ const control = {
   },
 };
 
+const diseases = {
+  "COVID-19": {
+      infectionRadius: 20,
+      infectionChance: 0.25,
+      recoveryTime: 500,
+      deathChance: 0.02,
+      speedMultiplier: 1.0
+  },
+  "Ebola": {
+      infectionRadius: 15,
+      infectionChance: 0.5,
+      recoveryTime: 700,
+      deathChance: 0.7,
+      speedMultiplier: 0.8
+  },
+  "Flu": {
+      infectionRadius: 25,
+      infectionChance: 0.1,
+      recoveryTime: 300,
+      deathChance: 0.001,
+      speedMultiplier: 1.2
+  }
+};
+
+let selectedDisease = null;
+let diseaseParams = null;
+
+const diseaseData = {
+  "COVID-19": { infectionRate: 10, recoveryRate: 85 },
+  "Flu": { infectionRate: 5, recoveryRate: 95 },
+  "Ebola": { infectionRate: 25, recoveryRate: 50 }
+};
+
 init();
 generatePopulation();
 initControls();
@@ -431,7 +464,7 @@ function render() {
 }
 
 // Define diseases
-const diseases = {
+/*const diseases = {
   "COVID-19": {
       infectionRadius: 20,
       infectionChance: 0.25,
@@ -462,7 +495,7 @@ const diseaseData = {
   "COVID-19": { infectionRate: 10, recoveryRate: 85 },
   "Flu": { infectionRate: 5, recoveryRate: 95 },
   "Ebola": { infectionRate: 25, recoveryRate: 50 }
-};
+};*/
 
 
 // Popup to select disease before simulation starts
@@ -601,12 +634,12 @@ function displayStats() {
 }
 
 // Random utility function if not already defined
-function random(min, max) {
-  return Math.random() * (max - min) + min;
-}
+//function random(min, max) {
+  //return Math.random() * (max - min) + min;
+//}
 
 
-// Infecting algorightm
+// Infecting algorithm
 function infectBlobs() {
   var initInfectedBlobs = control.infectedBlobs;
   for (var i = 0; i < initInfectedBlobs; i++) {
@@ -664,4 +697,18 @@ function initControls() {
   controls.add(control, "stopAnimation").name("Play/Stop Simulation");
   controls.add(control, "reload").name("Reload");
   controls.open();
+  window.simControl = control;// Expose control to global scope for debugging
+
+  // Attach event listener to open calculator safely
+document.getElementById("openCalculator").addEventListener("click", function () {
+  if (window.simControl) {
+    setTimeout(() => {
+      window.open('pandemic_calculator_view.html', '_blank');
+    }, 100);
+  } else {
+    alert("Control object is not ready. Please wait for simulation to load.");
+  }
+});
+
+
 }

@@ -3,19 +3,40 @@
   <head>
     <meta charset="utf-8" />
     <title>Pandemic JS Calculator</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+      }
+      pre {
+        background-color: #f0f0f0;
+        padding: 1em;
+        border: 1px solid #ccc;
+        white-space: pre-wrap;
+      }
+    </style>
   </head>
   <body>
     <h1>Pandemic JS Outbreak Calculator</h1>
     <pre id="output">Running simulation...</pre>
 
-    <script src="./js/pandemic_calculator.js"></script>
+    
     <script>
-      const oldLog = console.log;
       const outputDiv = document.getElementById('output');
-      console.log = function (message) {
-        outputDiv.textContent += message + '\n';
-        oldLog.apply(console, arguments);
+      const oldLog = console.log;
+
+      // Optional: collect all output into a buffer
+      let buffer = "";
+
+      // Override console.log
+      console.log = function (...args) {
+        const text = args.join(' ') + '\n';
+        buffer += text;
+        outputDiv.textContent = buffer; // Display full text
+        oldLog.apply(console, args);
       };
     </script>
+
+    <script src="./js/pandemic_calculator.js"></script>
   </body>
 </html>

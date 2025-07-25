@@ -39,9 +39,7 @@
     </div>
     <div style="position: absolute; top: 100px; left: 20px; z-index: 999;">
       <button onclick="window.open('analyzer.html', '_blank')">Open ML Analyzer</button>
-      <button onclick="window.open('pandemic_calculator_view.html', '_blank')">
-      Run Basic JS Pandemic Calculator
-      </button>
+      <button id="openCalculator">Run Basic JS Calculator</button>
     </div>
 
 
@@ -53,5 +51,20 @@
       import * as THREE from "https://unpkg.com/three@<VERSION>/build/three.module.js";
     </script> -->
     <script src="./main.js"></script>
+
+    <script>
+      window.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("openCalculator");
+        btn.addEventListener("click", () => {
+          if (window.control) {
+            setTimeout(() => {
+              window.open("pandemic_calculator_view.html", "_blank");
+            }, 100);
+          } else {
+            alert("Control object is not ready. Please wait for simulation to load.");
+          }
+        });
+      });
+    </script>
   </body>
 </html>
